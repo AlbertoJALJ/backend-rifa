@@ -19,7 +19,9 @@ router.get("/check-auth", (req, res, next) => {
 });
 router.post("/register", async (req, res, next) => {
   const { username, password } = req.body;
+  console.log(password);
   const hash = await bcrypt.hash(password, 10);
+
   const new_user = await Creds.create({
     password: hash,
     username,
@@ -95,6 +97,18 @@ router.post("/", async (req, res, next) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+router.get("/clear", async (req, res) => {
+  const users = await User.deleteMany();
+  const tickets = await Ticket.deleteMany();
+
+  const tickets_nuevos = Array.from(Array(50000), (_, index) => ({
+    disponible: true,
+    numero_boleto: index + 1,
+  }));
+  await Ticket.insertMany(tickets_nuevos);
+  res.status(200).json({ message: 200 });
 });
 
 router.get("/generate-tickets", async (req, res, next) => {
